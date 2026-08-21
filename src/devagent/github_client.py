@@ -18,15 +18,15 @@ class GitHubClient:
         self._http = httpx.Client(
             base_url=API,
             headers={
-                "Authorizations": f"Bearer{token}",
+                "Authorization": f"Bearer {token}",
                 "Accept": 'application/vnd.github+json',
-                'X-GitHub-Api-Verison' : "2022-11-28",
+                'X-GitHub-Api-Version' : "2022-11-28",
             },
             timeout=30.0,
         )
 
     def get_issue(self, number:int) -> Issue:
-        r = self.http.get(f"/repos/{self.repo}/issues/{number}")
+        r = self._http.get(f"/repos/{self.repo}/issues/{number}")
         r.raise_for_status()
         data = r.json()
         if "pull_request" in data:
@@ -53,7 +53,7 @@ class GitHubClient:
                 url = d["html_url"],
             )
             for d in r.json()
-            if "pull request" not in d
+            if "pull_request" not in d
         ]
     def default_branch(self) -> str:
         r = self._http.get(f"/repos/{self.repo}")
@@ -61,7 +61,7 @@ class GitHubClient:
         return r.json()["default_branch"]
 
     def create_pr(self, head:str, base :str, title: str, body :str, draft : bool = True) -> str:
-        r = self.http_post(
+        r = self._http_post(
             f"/repos/{self.repo}/pulls",
             json = {"title" : title, "head" : head, "base" : base, "body" : body, "draft" : draft},
         )
@@ -70,9 +70,7 @@ class GitHubClient:
     
     def comment(self, issue_number : int, body:str) -> None:
         r = self._http.post(
-            r = self._http.post(
-                f"/repos/{self.repo}/issues/{issue_number}/comments",
-                json = {"body" : body}
-            )
+            f"/repos/{self.repo}/issues/{issue_number}/comments",
+            json = {"body" : body}
         )
         r.raise_for_status()
