@@ -35,3 +35,14 @@ class Workspace:
         self.branch = f"agent/issue-{issue_number}-{slug}"
         self._git("checkout", "-b", self.branch)
         return self.branch
+    
+    # ---- state inspection ------------------------------------------------
+    def changed_files(self) -> list[str]:
+        out = self._git("status", "--porcelain").stdout
+        return [line[3:].strip() for line in out.splitlines() if line.strip()]
+
+    def code_changed_files(self) -> list[str]:
+        return [f for f in self.changed_files() if f not in self.NOTE_FILES]
+
+    def _stage_all(self) -> None:
+        self._git("add", "-A", check=False)
