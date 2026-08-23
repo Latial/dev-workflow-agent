@@ -46,3 +46,30 @@ class Workspace:
 
     def _stage_all(self) -> None:
         self._git("add", "-A", check=False)
+
+    def diff_line_count(self) -> int:
+        self._stage_all()
+        out = self._git("diff", "--cached", "--numstat").stdout
+        total = 0
+        for line in out.splitlines():
+            added, deleted, *_ = line.split("\t")
+            if added != "":
+                total += int(added) + int(deleted)
+        return total
+
+    def diff_text(self, limit :int = 40_000) -> str:
+        self._stage_all()
+        return self._git("diff", "--cached").stdout[:limit]
+    
+    # ---- publishing ------------------------------------------------------ 
+    def commit_all(self, message:str) -> None:
+        self._stage_all()
+        self._git(
+            "-c" , "user.name=Dev-Worlflow-Agent",
+            "-c", "user.email=devagent@users.noreply.github.com",
+            "commit", "-m", message,
+        ) 
+    def push(self) -> None:
+        assert self.branch, "create_branch() must run first"
+        self._git("push", "-u", "origin", self.branch)
+    
