@@ -8,7 +8,7 @@
        "httpx",
        "python-dotenv",
        "mcp[cli]",
-   ]
+]
 
    [project.optional-dependencies]
    dev = ["pytest"]
