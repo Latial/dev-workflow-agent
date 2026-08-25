@@ -1,5 +1,5 @@
 from pathlib import Path
-from devagent.workplace import Workspace
+from devagent.workspace import Workspace
 
 def test_branch_sluug(tmp_path: Path):
     ws = Workspace(tmp_path, "run1", "me/repo", "tok")
