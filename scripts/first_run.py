@@ -7,7 +7,7 @@ from devagent.agent_runner import run_agent
 
 s = load_settings()
 gh = GitHubClient(s.github_token, s.target_repo)
-issue = gh.get_issue(5)                     # <- your toy issue's number
+issue = gh.get_issue(1)                     # <- your toy issue's number
 run_id = dt.datetime.now().strftime("%Y%m%d-%H%M%S") + f"-i{issue.number}"
 ws = Workspace(s.runs_dir, run_id, s.target_repo, s.github_token)
 ws.clone()
