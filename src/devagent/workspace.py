@@ -52,10 +52,15 @@ class Workspace:
         out = self._git("diff", "--cached", "--numstat").stdout
         total = 0
         for line in out.splitlines():
-            added, deleted, *_ = line.split("\t")
-            if added != "":
-                total += int(added) + int(deleted)
+            parts = line.split("\t")
+            if len(parts) < 3:
+                continue
+            added, deleted = parts[0], parts[1]
+            if added == "-" or deleted == "-":      # binary file — not line-countable
+                continue
+            total += int(added) + int(deleted)
         return total
+    
 
     def diff_text(self, limit :int = 40_000) -> str:
         self._stage_all()
