@@ -61,7 +61,7 @@ class GitHubClient:
         return r.json()["default_branch"]
 
     def create_pr(self, head:str, base :str, title: str, body :str, draft : bool = True) -> str:
-        r = self._http_post(
+        r = self._http.post(
             f"/repos/{self.repo}/pulls",
             json = {"title" : title, "head" : head, "base" : base, "body" : body, "draft" : draft},
         )
