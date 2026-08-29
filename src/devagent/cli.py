@@ -13,6 +13,7 @@ from devagent.config import load_settings
 from devagent.github_client import GitHubClient
 from devagent.validation import run_gates
 from devagent.workspace import Workspace
+from devagent.reviewer import run_reviewer
 
 def cmd_run(args: argparse.Namespace) -> None:
     settings = load_settings()
@@ -75,6 +76,15 @@ def cmd_run(args: argparse.Namespace) -> None:
         cost_usd=result.cost_usd, num_turns=result.num_turns,
         duration_s=result.duration_s,
     )
+    if pr_url and args.review:
+        diff = ws.diff_text()
+        review = asyncio.run(run_reviewer(ws.repo_dir, issue, diff, settings))
+        (ws.repo_dir / "REVIEW.md").unlink(missing_ok=True)   # keep repo clean
+        (ws.root / "review.md").write_text(review, encoding="utf-8")
+        gh.comment(issue.number,
+                   f"**Automated review of the draft PR** ({pr_url}):\n\n{review}")
+        print(f"[{run_id}] review posted "
+              f"({'APPROVE' if 'Verdict: APPROVE' in review else 'CHANGES REQUESTED'})")
 
 def cmd_verdict(args:argparse.Namespace) -> None:
     metrics.set_verdict(args.run_id, args.verdict, args.failure_mode, args.notes)
